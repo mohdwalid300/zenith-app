@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1117">
+<title>Zenith</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #080c10;
+  --bg2: #0d1117;
+  --bg3: #111820;
+  --bg4: #161e28;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --text: #e8edf2;
+  --text2: #8a9bb0;
+  --text3: #4a5a6a;
+  --gold: #c9a84c;
+  --gold2: #e8c97a;
+  --gold-dim: rgba(201,168,76,0.12);
+  --green: #2ecc8a;
+  --green-dim: rgba(46,204,138,0.1);
+  --red: #e05555;
+  --red-dim: rgba(224,85,85,0.1);
+  --amber: #e8a230;
+  --amber-dim: rgba(232,162,48,0.1);
+  --blue: #4a9eff;
+  --blue-dim: rgba(74,158,255,0.1);
+  --purple: #9b7fe8;
+  --purple-dim: rgba(155,127,232,0.1);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+body.light {
+  --bg: #f0f2f5;
+  --bg2: #ffffff;
+  --bg3: #f5f7fa;
+  --bg4: #e8ecf2;
+  --border: rgba(0,0,0,0.07);
+  --border2: rgba(0,0,0,0.13);
+  --text: #111827;
+  --text2: #4b5563;
+  --text3: #9ca3af;
+  --gold: #b08020;
+  --gold2: #9a6f18;
+  --gold-dim: rgba(176,128,32,0.1);
+  --green: #16a066;
+  --green-dim: rgba(22,160,102,0.1);
+  --red: #dc2626;
+  --red-dim: rgba(220,38,38,0.08);
+  --amber: #d97706;
+  --amber-dim: rgba(217,119,6,0.1);
+  --blue: #2563eb;
+  --blue-dim: rgba(37,99,235,0.1);
+  --purple: #7c3aed;
+  --purple-dim: rgba(124,58,237,0.1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; overflow-x: hidden; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* LAYOUT */
+.shell { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 220px; min-width: 220px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 0; overflow-y: auto; overflow-x: hidden; }
+.main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+/* SIDEBAR */
+.logo-wrap { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
+.logo { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -.5px; color: var(--gold2); }
+.logo span { color: var(--text3); font-size: 10px; font-weight: 400; font-family: var(--font-body); display: block; margin-top: 2px; letter-spacing: .08em; text-transform: uppercase; }
+.nav { padding: 12px 0; }
+.nav-section { padding: 16px 20px 6px; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); font-family: var(--font-display); }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; cursor: pointer; color: var(--text2); font-size: 13px; transition: all .15s; position: relative; border-left: 2px solid transparent; }
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.nav-item.active { color: var(--gold2); border-left-color: var(--gold); background: var(--gold-dim); }
+.nav-item .nav-icon { width: 16px; height: 16px; opacity: .7; flex-shrink: 0; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-badge { margin-left: auto; background: var(--red-dim); color: var(--red); font-size: 10px; font-family: var(--font-mono); padding: 1px 6px; border-radius: 10px; font-weight: 500; }
+.nav-badge.green { background: var(--green-dim); color: var(--green); }
+.nav-badge.amber { background: var(--amber-dim); color: var(--amber); }
+.nav-badge.gold { background: var(--gold-dim); color: var(--gold2); }
+
+.upload-zone { margin: 0 12px 12px; border: 1px dashed var(--border2); border-radius: 10px; padding: 12px; cursor: pointer; transition: all .2s; }
+.upload-zone:hover { border-color: var(--gold); background: var(--gold-dim); }
+.upload-zone-label { font-size: 10px; color: var(--text3); text-align: center; letter-spacing: .04em; }
+.upload-zone-label strong { display: block; color: var(--text2); font-size: 11px; margin-bottom: 3px; font-weight: 500; }
+
+/* TOPBAR */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--bg2); position: sticky; top: 0; z-index: 10; }
+.page-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--text); }
+.page-subtitle { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); font-size: 12px; font-family: var(--font-body); cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 6px; }
+.btn:hover { color: var(--text); border-color: var(--border2); background: var(--bg4); }
+.btn.gold { background: var(--gold-dim); border-color: rgba(201,168,76,0.3); color: var(--gold2); }
+.btn.gold:hover { background: rgba(201,168,76,0.2); }
+.refresh-time { font-family: var(--font-mono); font-size: 10px; color: var(--text3); }
+
+/* CONTENT */
+.content { padding: 24px 28px; flex: 1; }
+
+/* DASHBOARD CARDS */
+.dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; position: relative; overflow: hidden; transition: border-color .2s; }
+.stat-card:hover { border-color: var(--border2); }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.stat-card.red::before { background: var(--red); }
+.stat-card.green::before { background: var(--green); }
+.stat-card.amber::before { background: var(--amber); }
+.stat-card.gold::before { background: var(--gold); }
+.stat-card.blue::before { background: var(--blue); }
+.stat-label { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; font-family: var(--font-display); }
+.stat-val { font-family: var(--font-display); font-size: 32px; font-weight: 700; line-height: 1; }
+.stat-val.red { color: var(--red); }
+.stat-val.green { color: var(--green); }
+.stat-val.amber { color: var(--amber); }
+.stat-val.gold { color: var(--gold2); }
+.stat-val.blue { color: var(--blue); }
+.stat-sub { font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+/* SECTION */
+.section { margin-bottom: 28px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text2); letter-spacing: .04em; display: flex; align-items: center; gap: 8px; }
+.section-title .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dot.red { background: var(--red); }
+.dot.green { background: var(--green); }
+.dot.amber { background: var(--amber); }
+.dot.gold { background: var(--gold); }
+.dot.blue { background: var(--blue); }
+.dot.purple { background: var(--purple); }
+
+/* COMPANY TABLE */
+.table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.table-header { display: grid; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); font-family: var(--font-display); }
+.table-row { display: grid; padding: 13px 16px; border-bottom: 1px solid var(--border); align-items: center; transition: background .12s; cursor: pointer; }
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background: rgba(255,255,255,0.02); }
+
+/* grid layouts per list type */
+.grid-v200 { grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr 90px; }
+.grid-sma { grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr 90px; }
+.grid-div { grid-template-columns: 1.8fr 1fr 1fr 1fr 90px; }
+
+.co-name { font-weight: 500; color: var(--text); font-size: 13px; }
+.co-ticker { font-family: var(--font-mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+.mono { font-family: var(--font-mono); font-size: 12px; }
+.up { color: var(--green); }
+.dn { color: var(--red); }
+.muted { color: var(--text2); }
+
+/* STATE BADGES */
+.state-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 500; font-family: var(--font-display); letter-spacing: .04em; white-space: nowrap; }
+.state-badge.in-zone { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,204,138,0.2); }
+.state-badge.near-zone { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(232,162,48,0.2); }
+.state-badge.averaging { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,85,85,0.2); }
+.state-badge.active { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(74,158,255,0.2); }
+.state-badge.future { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
+
+/* STRATEGY TAG */
+.strat-tag { display: inline-flex; padding: 2px 8px; border-radius: 6px; font-size: 9px; letter-spacing: .06em; text-transform: uppercase; font-family: var(--font-display); }
+.strat-tag.bunch { background: var(--purple-dim); color: var(--purple); }
+.strat-tag.sma { background: var(--blue-dim); color: var(--blue); }
+.strat-tag.div { background: var(--gold-dim); color: var(--gold2); }
+
+/* FILTERS ROW */
+.filters-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: none; color: var(--text3); font-size: 11px; font-family: var(--font-body); cursor: pointer; transition: all .15s; }
+.filter-btn:hover { border-color: var(--border2); color: var(--text2); }
+.filter-btn.active { border-color: var(--gold); color: var(--gold2); background: var(--gold-dim); }
+.sort-select { padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 11px; font-family: var(--font-body); cursor: pointer; outline: none; }
+.sort-select:focus { border-color: var(--border2); }
+.toggle-future { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3); cursor: pointer; margin-left: auto; }
+.toggle-switch { width: 28px; height: 16px; background: var(--bg4); border-radius: 8px; border: 1px solid var(--border2); position: relative; transition: background .2s; }
+.toggle-switch.on { background: var(--gold-dim); border-color: rgba(201,168,76,0.3); }
+.toggle-switch::after { content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--text3); top: 2px; left: 2px; transition: all .2s; }
+.toggle-switch.on::after { left: 14px; background: var(--gold2); }
+
+/* UPLOAD PAGE */
+.upload-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 32px; }
+.upload-page-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--gold2); text-align: center; }
+.upload-page-sub { font-size: 13px; color: var(--text3); text-align: center; max-width: 420px; line-height: 1.7; }
+.upload-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; width: 100%; max-width: 580px; }
+.upload-card { background: var(--bg2); border: 1px dashed var(--border2); border-radius: 14px; padding: 20px; text-align: center; cursor: pointer; transition: all .2s; position: relative; }
+.upload-card:hover { border-color: var(--gold); background: var(--gold-dim); }
+.upload-card.loaded { border-style: solid; border-color: var(--green); background: var(--green-dim); }
+.upload-card-icon { font-size: 24px; margin-bottom: 8px; }
+.upload-card-name { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.upload-card-sub { font-size: 11px; color: var(--text3); }
+.upload-card input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-card.loaded .upload-card-sub { color: var(--green); }
+.proceed-btn { padding: 12px 36px; border-radius: 10px; border: none; background: var(--gold); color: #080c10; font-family: var(--font-display); font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; letter-spacing: .04em; }
+.proceed-btn:hover { background: var(--gold2); transform: translateY(-1px); }
+.proceed-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+/* LOADING */
+.loading-row { display: flex; align-items: center; gap: 10px; padding: 16px; color: var(--text3); font-size: 12px; }
+.spinner { width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--gold); border-radius: 50%; animation: spin .6s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* EMPTY */
+.empty-state { padding: 40px; text-align: center; color: var(--text3); font-size: 13px; }
+.empty-state strong { display: block; font-family: var(--font-display); font-size: 16px; color: var(--text2); margin-bottom: 6px; }
+
+/* MINI SPARKLINE */
+.sparkline { display: flex; align-items: flex-end; gap: 1.5px; height: 20px; }
+.spark-bar { width: 3px; border-radius: 1px; min-height: 2px; }
+
+/* PRICE BAR */
+.price-bar-wrap { height: 3px; background: var(--bg4); border-radius: 2px; margin-top: 4px; width: 80px; }
+.price-bar-fill { height: 100%; border-radius: 2px; }
+
+/* DETAIL PANEL */
+.detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; justify-content: flex-end; animation: fadeIn .15s; }
+@keyframes fadeIn { from { opacity: 0; } }
+.detail-panel { width: 400px; background: var(--bg2); border-left: 1px solid var(--border); overflow-y: auto; padding: 24px; animation: slideIn .2s; }
+@keyframes slideIn { from { transform: translateX(40px); opacity: 0; } }
+.detail-close { float: right; background: none; border: 1px solid var(--border); color: var(--text3); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.detail-close:hover { color: var(--text); border-color: var(--border2); }
+.detail-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); margin-top: 8px; }
+.detail-ticker { font-family: var(--font-mono); font-size: 12px; color: var(--text3); margin-top: 4px; }
+.detail-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.detail-section-title { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; font-family: var(--font-display); }
+.detail-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.detail-row:last-child { border-bottom: none; }
+.detail-key { color: var(--text3); }
+.detail-val { font-family: var(--font-mono); color: var(--text); font-weight: 500; }
+
+/* DASH ALERT LIST */
+.alert-list { display: flex; flex-direction: column; gap: 8px; }
+.alert-item { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color .15s; }
+.alert-item:hover { border-color: var(--border2); }
+.alert-item.urgent { border-color: rgba(46,204,138,0.25); }
+.alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.alert-content { flex: 1; }
+.alert-title { font-size: 13px; color: var(--text); font-weight: 500; }
+.alert-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.alert-right { text-align: right; }
+.alert-price { font-family: var(--font-mono); font-size: 13px; color: var(--text); }
+.alert-change { font-family: var(--font-mono); font-size: 10px; }
+
+/* TABS within list pages */
+.list-tabs { display: flex; gap: 2px; margin-bottom: 20px; background: var(--bg3); border-radius: 10px; padding: 3px; width: fit-content; }
+.list-tab { padding: 6px 16px; border-radius: 8px; border: none; background: none; color: var(--text3); font-size: 12px; font-family: var(--font-display); cursor: pointer; transition: all .15s; }
+.list-tab.active { background: var(--bg2); color: var(--text); border: 1px solid var(--border); }
+
+/* SMA STACK VISUAL */
+.sma-stack { display: flex; flex-direction: column; gap: 2px; }
+.sma-bar { height: 3px; border-radius: 2px; }
+
+/* Responsive tweaks for content */
+.dash-grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+/* Animate rows in */
+.table-row { animation: rowIn .2s both; }
+@keyframes rowIn { from { opacity: 0; transform: translateY(4px); } }
+
+/* ─── STRATEGY TABS ──────────────────────────────────────────────────────────── */
+.strat-tabs-wrap { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.strat-tab { flex: 1; min-width: 140px; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; text-align: left; transition: all .18s; -webkit-tap-highlight-color: transparent; }
+.strat-tab:hover { border-color: var(--border2); background: var(--bg3); }
+.strat-tab-active { border-color: var(--gold) !important; background: var(--gold-dim) !important; }
+.strat-tab-name { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.strat-tab-active .strat-tab-name { color: var(--gold2); }
+.strat-tab-counts { display: flex; gap: 6px; flex-wrap: wrap; }
+.strat-count { font-size: 10px; font-family: var(--font-mono); padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+.strat-count.green { background: var(--green-dim); color: var(--green); }
+.strat-count.amber { background: var(--amber-dim); color: var(--amber); }
+.strat-count.red { background: var(--red-dim); color: var(--red); }
+.strat-count.muted { background: var(--bg4); color: var(--text3); }
+
+/* ─── STATE SECTIONS ─────────────────────────────────────────────────────────── */
+.state-section { margin-bottom: 20px; }
+.state-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 4px; }
+.state-section-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text2); }
+.state-section-count { background: var(--bg4); color: var(--text3); font-size: 10px; font-family: var(--font-mono); padding: 2px 8px; border-radius: 10px; }
+.state-section-desc { font-size: 11px; color: var(--text3); }
+
+@media (max-width: 768px) {
+  .strat-tabs-wrap { gap: 8px; }
+  .strat-tab { min-width: calc(50% - 4px); padding: 12px 14px; border-radius: 10px; }
+  .strat-tab-name { font-size: 12px; }
+  .state-section-head { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .state-section-desc { font-size: 10px; }
+}
+@media (max-width: 768px) {
+
+  /* Layout: stack vertically, hide sidebar */
+  .shell { flex-direction: column; height: 100vh; overflow: hidden; }
+  .sidebar { display: none; }
+  .main { flex: 1; overflow-y: auto; padding-bottom: 70px; }
+
+  /* Mobile top header */
+  .topbar { padding: 12px 16px; }
+  .page-title { font-size: 15px; }
+  .page-subtitle { font-size: 10px; }
+  .topbar-actions .btn span { display: none; } /* hide button text, keep icons */
+  .btn { padding: 7px 10px; font-size: 11px; }
+
+  /* Content padding */
+  .content { padding: 14px 14px; }
+
+  /* Dashboard grid: 2x2 on mobile */
+  .dash-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card { padding: 12px 14px; }
+  .stat-val { font-size: 26px; }
+  .stat-sub { font-size: 10px; }
+
+  /* Dashboard 2-col → 1-col */
+  .dash-grid-2 { grid-template-columns: 1fr; gap: 14px; }
+
+  /* Tables → Cards on mobile */
+  .table-header { display: none; }
+  .table-row {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 14px;
+    grid-template-columns: none !important;
+  }
+  .table-row .co-name { font-size: 14px; }
+
+  /* Mobile card row top line */
+  .table-row > div:first-child { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+
+  /* Inline price info row on mobile */
+  .mob-price-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .mob-price-row > div { min-width: 80px; }
+
+  /* Filter row wraps nicely */
+  .filters-row { gap: 6px; }
+  .filter-btn { padding: 6px 10px; font-size: 11px; }
+  .toggle-future { margin-left: 0; width: 100%; justify-content: flex-end; }
+
+  /* Sort select full width on mobile */
+  .sort-select { font-size: 12px; }
+
+  /* Detail panel full screen on mobile */
+  .detail-panel { width: 100vw; border-left: none; border-top: 1px solid var(--border); border-radius: 16px 16px 0 0; max-height: 90vh; }
+  .detail-overlay { align-items: flex-end; }
+  @keyframes slideIn { from { transform: translateY(40px); opacity: 0; } }
+
+  /* Averaging page */
+  .table-row[style*="grid-template-columns:1.8fr"] {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  /* Alert items */
+  .alert-item { padding: 10px 12px; gap: 10px; }
+  .alert-title { font-size: 12px; }
+  .alert-sub { font-size: 10px; }
+  .alert-price { font-size: 12px; }
+
+  /* Hide price bar on mobile (too small) */
+  .price-bar-wrap { display: none; }
+
+  /* Topbar sort on mobile */
+  .topbar-actions { gap: 6px; }
+}
+
+/* ─── OPP ROW: mobile card / desktop row ──────────────────────────────────── */
+.mob-card { display: none; }
+.desktop-only-row { display: grid; }
+.opp-row-wrap { }
+
+@media (max-width: 768px) {
+  .mob-card { display: block; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 8px; cursor: pointer; transition: border-color .15s; -webkit-tap-highlight-color: transparent; }
+  .mob-card:active { border-color: var(--gold); }
+  .mob-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .mob-card-body { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+  .mob-card-stat-label { font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin-bottom: 3px; font-family: var(--font-display); }
+  .mob-card-stat-val { font-family: var(--font-mono); font-size: 12px; color: var(--text); font-weight: 500; }
+  .desktop-only-row { display: none !important; }
+  /* On mobile table-wrap is transparent since mob-cards have their own card style */
+  .state-section .table-wrap { background: none !important; border: none !important; border-radius: 0 !important; overflow: visible !important; }
+  .state-section .table-header { display: none !important; }
+}
+
+/* ─── MOBILE BOTTOM NAV ──────────────────────────────────────────────────────── */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  z-index: 50;
+  padding: 0;
+  height: 64px;
+}
+.mobile-nav-inner {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+.mob-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 9px;
+  font-family: var(--font-display);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  border: none;
+  background: none;
+  padding: 6px 4px;
+  position: relative;
+  transition: color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-nav-item.active { color: var(--gold2); }
+.mob-nav-item svg { width: 20px; height: 20px; }
+.mob-nav-badge {
+  position: absolute;
+  top: 6px; right: calc(50% - 18px);
+  background: var(--red);
+  color: #fff;
+  font-size: 8px;
+  font-family: var(--font-mono);
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  font-weight: 600;
+}
+
+/* Mobile sheet config button */
+.mob-sheet-btn {
+  display: none;
+  position: fixed;
+  bottom: 72px; right: 14px;
+  background: var(--gold);
+  color: #080c10;
+  border: none;
+  border-radius: 50%;
+  width: 44px; height: 44px;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 49;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile sheet modal */
+.mob-sheet-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  align-items: flex-end;
+}
+.mob-sheet-modal.open { display: flex; }
+.mob-sheet-inner {
+  background: var(--bg2);
+  border-radius: 16px 16px 0 0;
+  border-top: 1px solid var(--border);
+  padding: 20px 16px 32px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.mob-sheet-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .mobile-nav { display: block; }
+  .mob-sheet-btn { display: flex; }
+  /* iPhone safe area for bottom nav */
+  .mobile-nav { padding-bottom: env(safe-area-inset-bottom); height: calc(64px + env(safe-area-inset-bottom)); }
+  .main { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+  /* Prevent text size adjustment on rotation */
+  body { -webkit-text-size-adjust: 100%; }
+  /* Better tap targets */
+  .filter-btn { min-height: 36px; }
+  .mob-nav-item { min-height: 44px; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="logo">Zenith <span>Investment Intelligence</span></div>
+        <button onclick="toggleTheme()" id="theme-btn" title="Toggle Light/Dark" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;">🌙</button>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Dashboard
+        <span class="nav-badge" id="nav-badge-dash">—</span>
+      </div>
+      <div class="nav-section">Lists</div>
+      <div class="nav-item" onclick="showPage('v200')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L5 6 L8 9 L11 4 L14 7"/></svg>
+        V200
+        <span class="nav-badge green" id="nav-badge-v200">—</span>
+      </div>
+      <div class="nav-item" onclick="showPage('v40')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="8,2 14,14 2,14"/></svg>
+        V40
+        <span class="nav-badge gold" id="nav-badge-v40">—</span>
+      </div>
+      <div class="nav-item" onclick="showPage('v40next')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M6 5l4 3-4 3"/></svg>
+        V40 Next
+        <span class="nav-badge amber" id="nav-badge-v40next">—</span>
+      </div>
+      <div class="nav-item" onclick="showPage('dividend')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+        Dividend
+        <span class="nav-badge amber" id="nav-badge-div">—</span>
+      </div>
+      <div class="nav-section">Opportunities</div>
+      <div class="nav-item" onclick="showPage('averaging')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M8 2l-3 6h6l-3-6zM8 14l-3-6h6l-3 6z"/></svg>
+        10% Averaging
+        <span class="nav-badge" id="nav-badge-avg">—</span>
+      </div>
+    </nav>
+    <div style="padding: 0 12px 16px; border-top: 1px solid var(--border);">
+      <div style="font-size: 9px; color: var(--text3); text-align:center; margin: 12px 0 8px; letter-spacing:.06em; text-transform:uppercase;">Google Sheet</div>
+
+      <!-- Sheet ID input -->
+      <div style="margin-bottom:8px;">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">Sheet ID</div>
+        <input id="gs-sheet-id" placeholder="Paste Sheet ID here"
+          style="width:100%;padding:7px 9px;font-size:11px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text);font-family:var(--font-mono);outline:none;"
+          oninput="saveSheetConfig()">
+      </div>
+
+      <!-- Tab name inputs -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">V200 tab name</div>
+          <input id="gs-tab-v200" value="V200" style="width:100%;padding:5px 8px;font-size:11px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);outline:none;" oninput="saveSheetConfig()">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">V40 tab name</div>
+          <input id="gs-tab-v40" value="V40" style="width:100%;padding:5px 8px;font-size:11px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);outline:none;" oninput="saveSheetConfig()">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">V40 Next tab</div>
+          <input id="gs-tab-v40next" value="V40Next" style="width:100%;padding:5px 8px;font-size:11px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);outline:none;" oninput="saveSheetConfig()">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">Dividend tab</div>
+          <input id="gs-tab-div" value="Dividend" style="width:100%;padding:5px 8px;font-size:11px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);outline:none;" oninput="saveSheetConfig()">
+        </div>
+      </div>
+
+      <button onclick="loadFromGoogleSheet()" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(201,168,76,0.3);background:var(--gold-dim);color:var(--gold2);font-size:12px;font-family:var(--font-display);font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.04em;">
+        ↓ Load from Sheet
+      </button>
+      <div id="gs-status" style="font-size:10px;color:var(--text3);text-align:center;margin-top:8px;min-height:14px;"></div>
+
+      <!-- Divider -->
+      <div style="display:flex;align-items:center;gap:8px;margin:12px 0;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <div style="font-size:9px;color:var(--text3);letter-spacing:.06em;">OR UPLOAD FILES</div>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+
+      <!-- Keep file upload as fallback -->
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <label class="upload-zone" id="ul-v200">
+          <div class="upload-zone-label"><strong id="ul-v200-label">V200 Excel</strong>Click to upload</div>
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="handleUpload('v200',this)">
+        </label>
+        <label class="upload-zone" id="ul-v40">
+          <div class="upload-zone-label"><strong id="ul-v40-label">V40 Excel</strong>Click to upload</div>
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="handleUpload('v40',this)">
+        </label>
+        <label class="upload-zone" id="ul-v40next">
+          <div class="upload-zone-label"><strong id="ul-v40next-label">V40 Next Excel</strong>Click to upload</div>
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="handleUpload('v40next',this)">
+        </label>
+        <label class="upload-zone" id="ul-div">
+          <div class="upload-zone-label"><strong id="ul-div-label">Dividend Excel</strong>Click to upload</div>
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="handleUpload('dividend',this)">
+        </label>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div id="page-dashboard" class="page"></div>
+    <div id="page-v200" class="page" style="display:none"></div>
+    <div id="page-v40" class="page" style="display:none"></div>
+    <div id="page-v40next" class="page" style="display:none"></div>
+    <div id="page-dividend" class="page" style="display:none"></div>
+    <div id="page-averaging" class="page" style="display:none"></div>
+  </main>
+</div>
+
+<!-- DETAIL PANEL -->
+<div id="detail-overlay" class="detail-overlay" style="display:none" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mob-nav-item active" id="mob-nav-dashboard" onclick="showPage('dashboard')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Home
+      <span class="mob-nav-badge" id="mob-badge-dash" style="display:none"></span>
+    </button>
+    <button class="mob-nav-item" id="mob-nav-v200" onclick="showPage('v200')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L5 6 L8 9 L11 4 L14 7"/></svg>
+      V200
+      <span class="mob-nav-badge" id="mob-badge-v200" style="display:none"></span>
+    </button>
+    <button class="mob-nav-item" id="mob-nav-v40" onclick="showPage('v40')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="8,2 14,14 2,14"/></svg>
+      V40
+      <span class="mob-nav-badge" id="mob-badge-v40" style="display:none"></span>
+    </button>
+    <button class="mob-nav-item" id="mob-nav-v40next" onclick="showPage('v40next')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M6 5l4 3-4 3"/></svg>
+      V40N
+      <span class="mob-nav-badge" id="mob-badge-v40next" style="display:none"></span>
+    </button>
+    <button class="mob-nav-item" id="mob-nav-dividend" onclick="showPage('dividend')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+      Div
+      <span class="mob-nav-badge" id="mob-badge-div" style="display:none"></span>
+    </button>
+    <button class="mob-nav-item" id="mob-nav-averaging" onclick="showPage('averaging')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M8 2l-3 6h6l-3-6zM8 14l-3-6h6l-3 6z"/></svg>
+      10%
+      <span class="mob-nav-badge" id="mob-badge-avg" style="display:none"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE SHEET CONFIG BUTTON -->
+<button class="mob-sheet-btn" onclick="openMobSheet()" title="Configure Google Sheet">⚙</button>
+
+<!-- MOBILE SHEET MODAL -->
+<div class="mob-sheet-modal" id="mob-sheet-modal" onclick="closeMobSheet(event)">
+  <div class="mob-sheet-inner">
+    <div class="mob-sheet-title">
+      Google Sheet Setup
+      <button onclick="closeMobSheet()" style="background:none;border:1px solid var(--border);color:var(--text3);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;">✕</button>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Sheet ID</div>
+      <input id="mob-gs-sheet-id" placeholder="Paste your Google Sheet ID"
+        style="width:100%;padding:10px 12px;font-size:12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3);color:var(--text);font-family:var(--font-mono);outline:none;">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">V200 tab</div>
+        <input id="mob-gs-tab-v200" value="V200" style="width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);outline:none;">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">V40 tab</div>
+        <input id="mob-gs-tab-v40" value="V40" style="width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);outline:none;">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">V40 Next tab</div>
+        <input id="mob-gs-tab-v40next" value="V40Next" style="width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);outline:none;">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">Dividend tab</div>
+        <input id="mob-gs-tab-div" value="Dividend" style="width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text);outline:none;">
+      </div>
+    </div>
+
+    <button onclick="loadFromMobSheet()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--gold);color:#080c10;font-size:14px;font-family:var(--font-display);font-weight:700;cursor:pointer;letter-spacing:.04em;">
+      Load from Sheet
+    </button>
+    <div id="mob-gs-status" style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px;min-height:16px;"></div>
+  </div>
+</div>
+
+<script>
+// ─── THEME ───────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  const btn = document.getElementById('theme-btn');
+  btn.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('zenith-theme', isLight ? 'light' : 'dark');
+}
+// Restore saved theme
+(function() {
+  const saved = localStorage.getItem('zenith-theme');
+  if (saved === 'light') {
+    document.body.classList.add('light');
+    setTimeout(() => { const b = document.getElementById('theme-btn'); if(b) b.textContent = '☀️'; }, 0);
+  }
+})();
+
+// ─── GOOGLE SHEET CONFIG ─────────────────────────────────────────────────────
+
+// ─── MOBILE SHEET & NAV ──────────────────────────────────────────────
+function openMobSheet() {
+  const sid = document.getElementById('gs-sheet-id')?.value || '';
+  if (document.getElementById('mob-gs-sheet-id')) document.getElementById('mob-gs-sheet-id').value = sid;
+  ['v200','v40','v40next','div'].forEach(k => {
+    const src = document.getElementById('gs-tab-' + k);
+    const dst = document.getElementById('mob-gs-tab-' + k);
+    if (src && dst) dst.value = src.value;
+  });
+  document.getElementById('mob-sheet-modal').classList.add('open');
+}
+function closeMobSheet(e) {
+  if (!e || e.target === document.getElementById('mob-sheet-modal'))
+    document.getElementById('mob-sheet-modal').classList.remove('open');
+}
+function setMobStatus(msg, color) {
+  const el = document.getElementById('mob-gs-status');
+  if (el) { el.textContent = msg; el.style.color = color || 'var(--text3)'; }
+}
+async function loadFromMobSheet() {
+  const sid = document.getElementById('mob-gs-sheet-id')?.value?.trim() || '';
+  document.getElementById('gs-sheet-id').value = sid;
+  ['v200','v40','v40next','div'].forEach(k => {
+    const src = document.getElementById('mob-gs-tab-' + k);
+    const dst = document.getElementById('gs-tab-' + k);
+    if (src && dst) dst.value = src.value;
+  });
+  setMobStatus('Loading...', 'var(--amber)');
+  await loadFromGoogleSheet();
+  const gsStatus = document.getElementById('gs-status')?.textContent || '';
+  setMobStatus(gsStatus, gsStatus.includes('✓') ? 'var(--green)' : 'var(--red)');
+  if (gsStatus.includes('✓')) setTimeout(() => closeMobSheet(), 1200);
+}
+function updateMobileNav(page) {
+  document.querySelectorAll('.mob-nav-item').forEach(el => el.classList.remove('active'));
+  const btn = document.getElementById('mob-nav-' + page);
+  if (btn) btn.classList.add('active');
+}
+function updateMobileBadges() {
+  const inZone = STATE.opportunities.filter(o => o.state === 'in-zone');
+  const nearZone = STATE.opportunities.filter(o => o.state === 'near-zone');
+  const averaging = STATE.opportunities.filter(o => o.state === 'averaging');
+  const total = inZone.length + nearZone.length;
+  const setBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (count > 0) { el.textContent = count; el.style.display = 'flex'; }
+    else { el.style.display = 'none'; }
+  };
+  setBadge('mob-badge-dash', total);
+  setBadge('mob-badge-v200', STATE.opportunities.filter(o=>o.list==='v200'&&(o.state==='in-zone'||o.state==='near-zone')).length);
+  setBadge('mob-badge-v40', STATE.opportunities.filter(o=>o.list==='v40'&&(o.state==='in-zone'||o.state==='near-zone')).length);
+  setBadge('mob-badge-v40next', STATE.opportunities.filter(o=>o.list==='v40next'&&(o.state==='in-zone'||o.state==='near-zone')).length);
+  setBadge('mob-badge-div', STATE.opportunities.filter(o=>o.list==='dividend'&&(o.state==='in-zone'||o.state==='near-zone')).length);
+  setBadge('mob-badge-avg', averaging.length);
+}
+
+function saveSheetConfig() {
+  const config = {
+    sheetId: document.getElementById('gs-sheet-id').value.trim(),
+    tabs: {
+      v200: document.getElementById('gs-tab-v200').value.trim(),
+      v40: document.getElementById('gs-tab-v40').value.trim(),
+      v40next: document.getElementById('gs-tab-v40next').value.trim(),
+      dividend: document.getElementById('gs-tab-div').value.trim(),
+    }
+  };
+  localStorage.setItem('zenith-sheet-config', JSON.stringify(config));
+}
+
+function restoreSheetConfig() {
+  try {
+    const saved = localStorage.getItem('zenith-sheet-config');
+    if (!saved) return;
+    const config = JSON.parse(saved);
+    if (config.sheetId) document.getElementById('gs-sheet-id').value = config.sheetId;
+    if (config.tabs?.v200) document.getElementById('gs-tab-v200').value = config.tabs.v200;
+    if (config.tabs?.v40) document.getElementById('gs-tab-v40').value = config.tabs.v40;
+    if (config.tabs?.v40next) document.getElementById('gs-tab-v40next').value = config.tabs.v40next;
+    if (config.tabs?.dividend) document.getElementById('gs-tab-div').value = config.tabs.dividend;
+  } catch(e) {}
+}
+
+function setGSStatus(msg, color) {
+  const el = document.getElementById('gs-status');
+  if (el) { el.textContent = msg; el.style.color = color || 'var(--text3)'; }
+}
+
+// Parse CSV text into rows, handles quoted fields with commas inside
+function parseCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  return lines.map(line => {
+    const cols = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQuotes = !inQuotes; }
+      else if (ch === ',' && !inQuotes) { cols.push(current.trim()); current = ''; }
+      else { current += ch; }
+    }
+    cols.push(current.trim());
+    return cols;
+  });
+}
+
+async function fetchSheetTab(sheetId, tabName, listName) {
+  // Build the CSV export URL using tab name
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Tab "${tabName}" not found or sheet not public`);
+  const text = await r.text();
+  const rows = parseCSV(text);
+  if (rows.length < 2) throw new Error(`No data rows in tab "${tabName}"`);
+
+  // Find Ticker and Company column indices from header row
+  const header = rows[0].map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+  const tickerIdx = header.findIndex(h => h === 'ticker' || h === 'nse ticker' || h === 'nse code' || h === 'symbol');
+  const nameIdx = header.findIndex(h => h === 'company' || h === 'company name' || h === 'name');
+
+  if (tickerIdx === -1) throw new Error(`"Ticker" column not found in tab "${tabName}". Found: ${rows[0].join(', ')}`);
+
+  const companies = [];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    let ticker = (row[tickerIdx] || '').replace(/^"|"$/g, '').trim().toUpperCase();
+    let name = nameIdx !== -1 ? (row[nameIdx] || '').replace(/^"|"$/g, '').trim() : ticker;
+    if (!ticker) continue;
+    companies.push({ ticker, name, list: listName });
+  }
+  return companies;
+}
+
+async function loadFromGoogleSheet() {
+  const sheetId = document.getElementById('gs-sheet-id').value.trim();
+  if (!sheetId) { setGSStatus('Please enter your Sheet ID', 'var(--red)'); return; }
+
+  const tabs = {
+    v200: document.getElementById('gs-tab-v200').value.trim() || 'V200',
+    v40: document.getElementById('gs-tab-v40').value.trim() || 'V40',
+    v40next: document.getElementById('gs-tab-v40next').value.trim() || 'V40Next',
+    dividend: document.getElementById('gs-tab-div').value.trim() || 'Dividend',
+  };
+
+  saveSheetConfig();
+  setGSStatus('Connecting to Google Sheet...', 'var(--amber)');
+
+  const listMap = { v200: 'v200', v40: 'v40', v40next: 'v40next', dividend: 'dividend' };
+  let totalLoaded = 0;
+  let errors = [];
+
+  for (const [listName, tabName] of Object.entries(tabs)) {
+    try {
+      setGSStatus(`Loading ${tabName}...`, 'var(--amber)');
+      const companies = await fetchSheetTab(sheetId, tabName, listName);
+      STATE.lists[listName] = companies;
+      totalLoaded += companies.length;
+      // Update upload zone labels to show sheet status
+      const label = document.getElementById('ul-' + listName + '-label');
+      const zone = document.getElementById('ul-' + listName);
+      if (label) label.textContent = `✓ ${companies.length} from Sheet`;
+      if (zone) { zone.style.borderColor = 'var(--green)'; zone.style.background = 'var(--green-dim)'; }
+    } catch(e) {
+      errors.push(`${tabName}: ${e.message}`);
+    }
+  }
+
+  if (errors.length === 0) {
+    setGSStatus(`✓ ${totalLoaded} companies loaded`, 'var(--green)');
+  } else if (totalLoaded > 0) {
+    setGSStatus(`Loaded ${totalLoaded}. Errors: ${errors[0]}`, 'var(--amber)');
+  } else {
+    setGSStatus(`Failed — is sheet public?`, 'var(--red)');
+    console.error('Sheet errors:', errors);
+  }
+
+  if (totalLoaded > 0) fetchAllData();
+}
+
+// Auto-load from sheet on startup if config was saved previously
+setTimeout(async () => {
+  restoreSheetConfig();
+  const sheetId = document.getElementById('gs-sheet-id')?.value?.trim();
+  if (sheetId) {
+    setGSStatus('Auto-loading saved sheet...', 'var(--amber)');
+    await loadFromGoogleSheet();
+  }
+}, 300);
+
+
+const STATE = {
+  lists: { v200: [], v40: [], v40next: [], dividend: [] },
+  data: {},        // ticker -> { price, sma200, sma50, sma21, candles[], fetchedAt }
+  opportunities: [], // processed opportunities
+  lastRefresh: null,
+  showFuture: false,
+  currentPage: 'dashboard',
+  sortBunch: 'range',   // range | bunch-date | opportunity-date
+  filterState: 'all',   // all | in-zone | near-zone | averaging | future
+};
+
+// ─── UPLOAD ──────────────────────────────────────────────────────────────────
+function handleUpload(listName, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+    const companies = [];
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || !row[0]) continue;
+      const ticker = String(row[0]).trim().toUpperCase();
+      const name = row[1] ? String(row[1]).trim() : ticker;
+      if (ticker) companies.push({ ticker, name, list: listName });
+    }
+    STATE.lists[listName] = companies;
+    const label = document.getElementById('ul-' + listName + '-label');
+    const zone = document.getElementById('ul-' + listName);
+    label.textContent = `✓ ${companies.length} companies`;
+    zone.style.borderColor = 'var(--green)';
+    zone.style.background = 'var(--green-dim)';
+    fetchAllData();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─── YAHOO FINANCE FETCH — EOD (previous closed day) ─────────────────────────
+function getEODTimestamps() {
+  // Use yesterday midnight IST as period2 so we always get last closed candle
+  // IST = UTC+5:30. Market closes 3:30pm IST = 10:00 UTC
+  const now = new Date();
+  // period2 = start of today in UTC (gives us up to yesterday's close)
+  const todayMidnightUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const end = Math.floor(todayMidnightUTC / 1000);
+  const start = end - (400 * 24 * 3600); // 400 days back for 200 SMA headroom
+  return { start, end };
+}
+
+function getDataAsOfDate(candles) {
+  if (!candles || candles.length === 0) return null;
+  return new Date(candles[candles.length - 1].t);
+}
+
+async function fetchYahoo(ticker) {
+  const sym = ticker + '.NS';
+  const { start, end } = getEODTimestamps();
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&period1=${start}&period2=${end}&includePrePost=false`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const json = await r.json();
+    const result = json.chart?.result?.[0];
+    if (!result) throw new Error('No data');
+    const timestamps = result.timestamp || [];
+    const q = result.indicators?.quote?.[0] || {};
+    const opens = q.open || [];
+    const closes = q.close || [];
+    const highs = q.high || [];
+    const lows = q.low || [];
+    const candles = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      if (closes[i] == null) continue;
+      candles.push({
+        t: timestamps[i] * 1000,
+        o: opens[i], c: closes[i], h: highs[i], l: lows[i],
+        green: closes[i] >= opens[i]
+      });
+    }
+    const closes_arr = candles.map(c => c.c);
+    const sma200 = calcSMA(closes_arr, 200);
+    const sma50 = calcSMA(closes_arr, 50);
+    const sma21 = calcSMA(closes_arr, 21);
+    // Use last closed candle's close as price — never intraday
+    const price = closes_arr[closes_arr.length - 1];
+    const dataAsOf = getDataAsOfDate(candles);
+    return { ticker, price, sma200, sma50, sma21, candles, dataAsOf, fetchedAt: Date.now() };
+  } catch(e) {
+    return { ticker, price: null, sma200: null, sma50: null, sma21: null, candles: [], dataAsOf: null, fetchedAt: Date.now(), error: e.message };
+  }
+}
+
+function calcSMA(arr, period) {
+  if (arr.length < period) return null;
+  const slice = arr.slice(-period);
+  return slice.reduce((a, b) => a + b, 0) / period;
+}
+
+async function fetchAllData() {
+  const allTickers = new Set();
+  Object.values(STATE.lists).forEach(list => list.forEach(c => allTickers.add(c.ticker)));
+  if (allTickers.size === 0) return;
+
+  // Cache key: today's date string — if same day, skip re-fetch
+  const todayKey = new Date().toISOString().slice(0, 10);
+
+  renderCurrentPage();
+  for (const ticker of allTickers) {
+    const cached = STATE.data[ticker];
+    if (cached && cached.cacheDate === todayKey && cached.price) continue; // already fresh today
+    STATE.data[ticker] = { ticker, price: null, loading: true };
+    renderCurrentPage();
+    const d = await fetchYahoo(ticker);
+    d.cacheDate = todayKey;
+    STATE.data[ticker] = d;
+    processOpportunities();
+    STATE.lastRefresh = d.dataAsOf || new Date();
+    renderCurrentPage();
+  }
+  processOpportunities();
+  renderCurrentPage();
+}
+
+// ─── CANDLE PATTERN DETECTION ────────────────────────────────────────────────
+function findAllGreenBunches(candles) {
+  // Returns ALL qualifying bunches (20%+, 3+ green candles) across the full candle history
+  if (!candles || candles.length < 3) return [];
+  const bunches = [];
+  let i = 0;
+  while (i < candles.length) {
+    if (candles[i].green) {
+      let j = i;
+      while (j < candles.length && candles[j].green) j++;
+      const bunch = candles.slice(i, j);
+      if (bunch.length >= 3) {
+        const lowest = Math.min(...bunch.map(c => c.l));
+        const highest = Math.max(...bunch.map(c => c.h));
+        const rangePct = ((highest - lowest) / lowest) * 100;
+        if (rangePct >= 20) {
+          bunches.push({
+            bunch,
+            lowest,   // base price — lowest low of the bunch
+            highest,  // bunch top — highest high of the bunch
+            rangePct,
+            bunchStartDate: new Date(bunch[0].t),
+            bunchEndDate: new Date(bunch[bunch.length - 1].t),
+            endIdx: j - 1  // index of last candle in bunch, used to scan post-bunch candles
+          });
+        }
+      }
+      i = j;
+    } else { i++; }
+  }
+  return bunches;
+}
+
+function hasPriceTouchedBase(candles, bunchEndIdx, basePrice) {
+  // Checks if any candle LOW after the bunch ever came within 5% above the base
+  // (meaning price pulled back toward the base at some point)
+  const threshold = basePrice * 1.05; // within 5% above base counts as "touched"
+  for (let i = bunchEndIdx + 1; i < candles.length; i++) {
+    if (candles[i].l <= threshold) return true;
+  }
+  return false;
+}
+
+function checkSMAStack(data) {
+  if (!data.sma200 || !data.sma50 || !data.sma21 || !data.price) return false;
+  return data.sma200 > data.sma50 && data.sma50 > data.sma21 && data.sma21 > data.price;
+}
+
+function getSMAStackInvalidated(data) {
+  if (!data.sma200 || !data.sma50 || !data.sma21 || !data.price) return false;
+  return data.price > data.sma21 && data.sma21 > data.sma50 && data.sma50 > data.sma200;
+}
+
+function getBunchState(currentPrice, basePrice, bunchTop) {
+  // Correct state model per discussion:
+  // - Future: price never dropped to base after bunch (handled before calling this)
+  // - In Zone: price at or below base
+  // - Near Zone: price within 5% above base
+  // - 10% Averaging: price 10%+ below base
+  // - Invalidated: price back above bunch top (handled before calling this)
+  const pct = ((currentPrice - basePrice) / basePrice) * 100;
+  if (pct <= -10) return 'averaging';
+  if (pct <= 0) return 'in-zone';
+  if (pct <= 5) return 'near-zone';
+  return 'active'; // pulled back but not yet at base — still active, show separately
+}
+
+// ─── PROCESS OPPORTUNITIES ───────────────────────────────────────────────────
+function processOpportunities() {
+  STATE.opportunities = [];
+
+  Object.entries(STATE.lists).forEach(([listName, companies]) => {
+    companies.forEach(company => {
+      const data = STATE.data[company.ticker];
+      if (!data || data.loading || !data.price) return;
+
+      // ── GREEN BUNCH STRATEGY (V200, V40, V40Next) ──
+      if (listName !== 'dividend') {
+        const requireSMA = listName === 'v200';
+        const allBunches = findAllGreenBunches(data.candles);
+
+        allBunches.forEach((b, bIdx) => {
+          const basePrice = b.lowest;
+          const bunchTop = b.highest;
+          const currentPrice = data.price;
+
+          // V200: base must have been below 200 SMA at time of bunch
+          // Approximated: base < current SMA200 (SMA200 moves slowly)
+          if (requireSMA && data.sma200 && basePrice > data.sma200) return;
+
+          // Invalidation: current price is back above bunch top — opportunity over
+          if (currentPrice > bunchTop) return;
+
+          // Check if price ever pulled back toward base after the bunch
+          const everTouchedBase = hasPriceTouchedBase(data.candles, b.endIdx, basePrice);
+
+          let oppState;
+          if (!everTouchedBase) {
+            // Price never came back down to base — Future opportunity
+            oppState = 'future';
+          } else {
+            // Price has pulled back — determine active state
+            oppState = getBunchState(currentPrice, basePrice, bunchTop);
+          }
+
+          STATE.opportunities.push({
+            id: `${company.ticker}-bunch-${bIdx}`,
+            ticker: company.ticker,
+            name: company.name,
+            list: listName,
+            strategy: 'bunch',
+            basePrice,
+            bunchTop,
+            rangePct: b.rangePct,
+            bunchDate: b.bunchStartDate,
+            opportunityDate: b.bunchEndDate,
+            currentPrice,
+            state: oppState,
+            data
+          });
+        });
+      }
+
+      // ── SMA STACK STRATEGY (V40, V40Next) ──
+      if (listName === 'v40' || listName === 'v40next') {
+        const stackActive = checkSMAStack(data);
+        const stackInvalidated = getSMAStackInvalidated(data);
+        if (stackActive && !stackInvalidated) {
+          STATE.opportunities.push({
+            id: `${company.ticker}-sma`,
+            ticker: company.ticker,
+            name: company.name,
+            list: listName,
+            strategy: 'sma',
+            basePrice: data.price,
+            currentPrice: data.price,
+            state: 'in-zone', // SMA stack met = price below all SMAs = in zone by definition
+            stackDate: new Date(),
+            data
+          });
+        }
+      }
+
+      // ── DIVIDEND STRATEGY ──
+      if (listName === 'dividend') {
+        if (data.sma200 && data.price) {
+          const triggerLevel = data.sma200 * 0.80; // signal fires at 20% below SMA200
+          const currentPrice = data.price;
+          const basePrice = triggerLevel;
+
+          let oppState;
+          if (currentPrice <= triggerLevel) {
+            // At or below trigger
+            const dropBelowBase = ((triggerLevel - currentPrice) / triggerLevel) * 100;
+            oppState = dropBelowBase >= 10 ? 'averaging' : 'in-zone';
+          } else {
+            // Above trigger — check proximity
+            const pctAboveTrigger = ((currentPrice - triggerLevel) / triggerLevel) * 100;
+            if (pctAboveTrigger <= 5) oppState = 'near-zone';
+            else oppState = 'future';
+          }
+
+          STATE.opportunities.push({
+            id: `${company.ticker}-div`,
+            ticker: company.ticker,
+            name: company.name,
+            list: listName,
+            strategy: 'dividend',
+            basePrice,
+            currentPrice,
+            sma200: data.sma200,
+            dropFromSMA: ((data.sma200 - currentPrice) / data.sma200) * 100,
+            state: oppState,
+            data
+          });
+        }
+      }
+    });
+  });
+
+  updateBadges();
+}
+
+function updateBadges() {
+  const counts = { v200: 0, v40: 0, v40next: 0, div: 0, avg: 0, dash: 0 };
+  STATE.opportunities.forEach(o => {
+    if (o.state === 'in-zone' || o.state === 'near-zone') {
+      if (o.list === 'v200') counts.v200++;
+      if (o.list === 'v40') counts.v40++;
+      if (o.list === 'v40next') counts.v40next++;
+      if (o.list === 'dividend') counts.div++;
+      counts.dash++;
+    }
+    if (o.state === 'averaging') counts.avg++;
+  });
+  // Desktop sidebar badges
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+  set('nav-badge-dash', counts.dash || null);
+  set('nav-badge-v200', counts.v200 || null);
+  set('nav-badge-v40', counts.v40 || null);
+  set('nav-badge-v40next', counts.v40next || null);
+  set('nav-badge-div', counts.div || null);
+  set('nav-badge-avg', counts.avg || null);
+  // Mobile bottom nav badges
+  const setMob = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (val > 0) { el.textContent = val; el.style.display = 'flex'; }
+    else { el.style.display = 'none'; }
+  };
+  setMob('mob-badge-dash', counts.dash);
+  setMob('mob-badge-v200', counts.v200);
+  setMob('mob-badge-v40', counts.v40);
+  setMob('mob-badge-v40next', counts.v40next);
+  setMob('mob-badge-div', counts.div);
+  setMob('mob-badge-avg', counts.avg);
+}
+
+function showPage(page) {
+  STATE.currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.style.display = '';
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes("'" + page + "'")) n.classList.add('active');
+  });
+  // Update mobile bottom nav
+  document.querySelectorAll('.mob-nav-item').forEach(n => n.classList.remove('active'));
+  const mobEl = document.getElementById('mob-nav-' + page);
+  if (mobEl) mobEl.classList.add('active');
+  const main = document.querySelector('.main');
+  if (main) main.scrollTop = 0;
+  renderCurrentPage();
+}
+
+function renderCurrentPage() {
+  const p = STATE.currentPage;
+  if (p === 'dashboard') renderDashboard();
+  else if (p === 'v200') renderListPage('v200', 'V200', 'bunch');
+  else if (p === 'v40') renderListPage('v40', 'V40', 'both');
+  else if (p === 'v40next') renderListPage('v40next', 'V40 Next', 'both');
+  else if (p === 'dividend') renderListPage('dividend', 'Dividend', 'dividend');
+  else if (p === 'averaging') renderAveragingPage();
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const el = document.getElementById('page-dashboard');
+  const inZone = STATE.opportunities.filter(o => o.state === 'in-zone');
+  const nearZone = STATE.opportunities.filter(o => o.state === 'near-zone');
+  const averaging = STATE.opportunities.filter(o => o.state === 'averaging');
+  const future = STATE.opportunities.filter(o => o.state === 'future');
+  const total = Object.values(STATE.lists).reduce((a,b) => a + b.length, 0);
+  const allData = Object.values(STATE.data).filter(d => d.dataAsOf);
+  const latestAsOf = allData.length > 0 ? allData[0].dataAsOf : null;
+  const asOfStr = latestAsOf
+    ? 'Data as of ' + latestAsOf.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    : STATE.lastRefresh ? 'Loaded ' + STATE.lastRefresh.toLocaleTimeString('en-IN') : 'Not yet loaded';
+
+  const urgentOpps = [...inZone, ...nearZone].sort((a,b) => {
+    const order = { 'in-zone': 0, 'near-zone': 1 };
+    return order[a.state] - order[b.state];
+  }).slice(0, 8);
+
+  el.innerHTML = `
+    <div class="topbar">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-subtitle">${asOfStr}</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn" onclick="toggleTheme()" title="Toggle theme" style="padding:7px 10px;">🌙</button>
+        <button class="btn gold" onclick="fetchAllData()">↻ Refresh All</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="dash-grid">
+        <div class="stat-card green">
+          <div class="stat-label">In Buying Zone</div>
+          <div class="stat-val green">${inZone.length}</div>
+          <div class="stat-sub">Act now — at base price</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-label">Near Zone</div>
+          <div class="stat-val amber">${nearZone.length}</div>
+          <div class="stat-sub">Within 5% of base</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">10% Averaging</div>
+          <div class="stat-val red">${averaging.length}</div>
+          <div class="stat-sub">Below base by 10%+</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Total Watched</div>
+          <div class="stat-val gold">${total}</div>
+          <div class="stat-sub">Across all 4 lists</div>
+        </div>
+      </div>
+
+      <div class="dash-grid-2">
+        <div>
+          <div class="section-head">
+            <div class="section-title"><span class="dot green"></span>Active Opportunities</div>
+          </div>
+          <div class="alert-list">
+            ${urgentOpps.length === 0 ? `<div class="empty-state"><strong>No active signals</strong>Upload your Excel files to begin</div>` :
+              urgentOpps.map(o => `
+              <div class="alert-item ${o.state === 'in-zone' ? 'urgent' : ''}" onclick="showDetail('${o.id}')">
+                <div class="alert-dot" style="background:${o.state==='in-zone'?'var(--green)':'var(--amber)'}"></div>
+                <div class="alert-content">
+                  <div class="alert-title">${o.name}</div>
+                  <div class="alert-sub">
+                    <span class="strat-tag ${o.strategy==='bunch'?'bunch':o.strategy==='sma'?'sma':'div'}">${o.strategy==='bunch'?'Green Bunch':o.strategy==='sma'?'SMA Stack':'Dividend'}</span>
+                    &nbsp;${o.list.toUpperCase()} · Base ₹${fmt(o.basePrice)}
+                  </div>
+                </div>
+                <div class="alert-right">
+                  <div class="alert-price">₹${fmt(o.currentPrice)}</div>
+                  <div class="alert-change ${o.state==='in-zone'?'up':''}">
+                    ${getDistanceStr(o)}
+                  </div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div>
+          <div class="section-head">
+            <div class="section-title"><span class="dot red"></span>List Breakdown</div>
+          </div>
+          <div class="table-wrap">
+            ${['v200','v40','v40next','dividend'].map(l => {
+              const opps = STATE.opportunities.filter(o => o.list === l);
+              const iz = opps.filter(o=>o.state==='in-zone').length;
+              const nz = opps.filter(o=>o.state==='near-zone').length;
+              const av = opps.filter(o=>o.state==='averaging').length;
+              const loaded = STATE.lists[l].length;
+              return `<div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;cursor:pointer" onclick="showPage('${l}')">
+                <div><div class="co-name">${l==='v40next'?'V40 Next':l.toUpperCase()}</div><div class="co-ticker">${loaded} companies</div></div>
+                <div class="mono ${iz>0?'up':'muted'}">${iz} in zone</div>
+                <div class="mono ${nz>0?'':' muted'}" style="color:${nz>0?'var(--amber)':'var(--text3)'}">${nz} near</div>
+                <div class="mono ${av>0?'dn':'muted'}">${av} avg</div>
+                <div style="color:var(--text3);font-size:11px">→</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      ${future.length > 0 ? `
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title"><span class="dot" style="background:var(--text3)"></span>Future Pipeline (${future.length})</div>
+          <button class="btn" onclick="showPage('v200')">View all →</button>
+        </div>
+        <div style="font-size:12px;color:var(--text3)">Companies with valid patterns but price still above buying zone. Toggle "Show Future" in any list to see them.</div>
+      </div>` : ''}
+    </div>`;
+}
+
+// ─── LIST PAGE ────────────────────────────────────────────────────────────────
+// STATE per list: which strategy tab is active
+if (!STATE.activeStrategy) STATE.activeStrategy = { v200: 'bunch', v40: 'bunch', v40next: 'bunch', dividend: 'dividend' };
+
+const STRATEGY_LABELS = { bunch: 'Green Bunch', sma: 'SMA Stack', dividend: 'Dividend' };
+const STATE_CONFIG = [
+  { key: 'in-zone',   label: 'In Zone',       dot: 'green',  desc: 'At or below base price — act now' },
+  { key: 'near-zone', label: 'Near Zone',     dot: 'amber',  desc: 'Within 5% of base — keep watching' },
+  { key: 'active',    label: 'Active',        dot: 'blue',   desc: 'Price pulled back but not yet at base' },
+  { key: 'future',    label: 'Future',        dot: '',       desc: 'Price never dropped to base yet' },
+  { key: 'averaging', label: '10% Averaging', dot: 'red',    desc: '10%+ below base — consider averaging' },
+];
+
+function sortOpps(opps) {
+  const s = STATE.sortBunch;
+  return [...opps].sort((a, b) => {
+    if (s === 'range') return (b.rangePct || 0) - (a.rangePct || 0);
+    if (s === 'bunch-date') return (b.bunchDate||b.stackDate||new Date(0)) - (a.bunchDate||a.stackDate||new Date(0));
+    if (s === 'opportunity-date') return (b.opportunityDate||b.stackDate||new Date(0)) - (a.opportunityDate||a.stackDate||new Date(0));
+    return 0;
+  });
+}
+
+function renderListPage(listName, title, strategyMode) {
+  const el = document.getElementById('page-' + listName);
+  const companies = STATE.lists[listName];
+  const allOpps = STATE.opportunities.filter(o => o.list === listName);
+  const loadingTickers = companies.filter(c => STATE.data[c.ticker]?.loading);
+  const refreshStr = STATE.lastRefresh ? STATE.lastRefresh.toLocaleTimeString('en-IN') : '—';
+
+  // Available strategies for this list
+  const strategies = strategyMode === 'both' ? ['bunch', 'sma']
+                   : strategyMode === 'dividend' ? ['dividend']
+                   : ['bunch'];
+
+  // Ensure active strategy is valid for this list
+  if (!STATE.activeStrategy) STATE.activeStrategy = {};
+  if (!strategies.includes(STATE.activeStrategy[listName])) {
+    STATE.activeStrategy[listName] = strategies[0];
+  }
+  const activeSt = STATE.activeStrategy[listName];
+  const stOpps = allOpps.filter(o => o.strategy === activeSt);
+
+  // Strategy tab counts
+  const stratCounts = {};
+  strategies.forEach(st => {
+    const s = allOpps.filter(o => o.strategy === st);
+    stratCounts[st] = {
+      total: s.length,
+      inZone: s.filter(o => o.state === 'in-zone').length,
+      nearZone: s.filter(o => o.state === 'near-zone').length,
+      active: s.filter(o => o.state === 'active').length,
+      averaging: s.filter(o => o.state === 'averaging').length,
+      future: s.filter(o => o.state === 'future').length,
+    };
+  });
+
+  // Data as-of: get from first loaded ticker
+  const sampleTicker = companies.find(c => STATE.data[c.ticker]?.dataAsOf);
+  const dataAsOf = sampleTicker ? STATE.data[sampleTicker.ticker].dataAsOf : null;
+  const asOfStr = dataAsOf ? dataAsOf.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : refreshStr;
+
+  el.innerHTML = `
+    <div class="topbar">
+      <div>
+        <div class="page-title">${title}</div>
+        <div class="page-subtitle">${companies.length} companies · Data as of ${asOfStr}</div>
+      </div>
+      <div class="topbar-actions">
+        <select class="sort-select" onchange="STATE.sortBunch=this.value;renderCurrentPage()">
+          <option value="range" ${STATE.sortBunch==='range'?'selected':''}>Range %</option>
+          <option value="bunch-date" ${STATE.sortBunch==='bunch-date'?'selected':''}>Bunch Date</option>
+          <option value="opportunity-date" ${STATE.sortBunch==='opportunity-date'?'selected':''}>Opp. Date</option>
+        </select>
+        <button class="btn gold" onclick="refreshList('${listName}')">↻</button>
+      </div>
+    </div>
+    <div class="content">
+
+      ${loadingTickers.length > 0 ? `<div class="loading-row"><div class="spinner"></div>Fetching ${loadingTickers.length} companies...</div>` : ''}
+
+      ${companies.length === 0 ? `<div class="table-wrap"><div class="empty-state"><strong>No companies loaded</strong>Add your ${title} Google Sheet tab or upload Excel from sidebar</div></div>` : `
+
+      <!-- STRATEGY TABS -->
+      <div class="strat-tabs-wrap">
+        ${strategies.map(st => {
+          const c = stratCounts[st];
+          const isActive = activeSt === st;
+            const activeSignals = c.inZone + c.nearZone + c.active;
+            return `<button class="strat-tab ${isActive ? 'strat-tab-active' : ''}"
+            onclick="STATE.activeStrategy['${listName}']='${st}';renderCurrentPage()">
+            <div class="strat-tab-name">${STRATEGY_LABELS[st]}</div>
+            <div class="strat-tab-counts">
+              ${c.inZone > 0 ? `<span class="strat-count green">${c.inZone} in zone</span>` : ''}
+              ${c.nearZone > 0 ? `<span class="strat-count amber">${c.nearZone} near</span>` : ''}
+              ${c.active > 0 ? `<span class="strat-count" style="background:var(--blue-dim);color:var(--blue)">${c.active} active</span>` : ''}
+              ${c.averaging > 0 ? `<span class="strat-count red">${c.averaging} avg</span>` : ''}
+              ${activeSignals === 0 && c.future === 0 ? `<span class="strat-count muted">No signals</span>` : ''}
+              ${activeSignals === 0 && c.future > 0 ? `<span class="strat-count muted">${c.future} future</span>` : ''}
+            </div>
+          </button>`;
+        }).join('')}
+      </div>
+
+      <!-- STATE SECTIONS -->
+      ${STATE_CONFIG.map(sc => {
+        // Future and Active only shown when toggle is on
+        if ((sc.key === 'future' || sc.key === 'active') && !STATE.showFuture) return '';
+        const sectionOpps = sortOpps(stOpps.filter(o => o.state === sc.key));
+        if (sectionOpps.length === 0) return '';
+        return `
+          <div class="state-section">
+            <div class="state-section-head">
+              <div style="display:flex;align-items:center;gap:8px">
+                ${sc.dot ? `<span class="dot ${sc.dot}"></span>` : `<span class="dot" style="background:var(--text3)"></span>`}
+                <span class="state-section-title">${sc.label}</span>
+                <span class="state-section-count">${sectionOpps.length}</span>
+              </div>
+              <span class="state-section-desc">${sc.desc}</span>
+            </div>
+            <div class="table-wrap">
+              <div class="table-header grid-v200 desktop-only-row">
+                <div>Company</div><div>Current Price</div><div>Base Price</div>
+                <div>${activeSt==='dividend'?'200 SMA':activeSt==='sma'?'SMA Stack':'Range %'}</div>
+                <div>Bunch Date</div><div>Status</div>
+              </div>
+              ${sectionOpps.map((o,i) => renderOppRow(o, activeSt, i)).join('')}
+            </div>
+          </div>`;
+      }).join('')}
+
+      <!-- Show counts for hidden sections -->
+      ${!STATE.showFuture ? (() => {
+        const futureCount = stOpps.filter(o => o.state === 'future').length;
+        const activeCount = stOpps.filter(o => o.state === 'active').length;
+        const total = futureCount + activeCount;
+        return total > 0 ? `<div style="font-size:12px;color:var(--text3);text-align:right;margin-top:4px">${activeCount > 0 ? activeCount + ' active' : ''}${activeCount > 0 && futureCount > 0 ? ' · ' : ''}${futureCount > 0 ? futureCount + ' future' : ''} — toggle to show</div>` : '';
+      })() : ''}
+
+      <!-- Future toggle -->
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:16px">
+        <label class="toggle-future" onclick="STATE.showFuture=!STATE.showFuture;renderCurrentPage()">
+          <span>Show Active & Future</span>
+          <div class="toggle-switch ${STATE.showFuture?'on':''}"></div>
+        </label>
+      </div>
+
+      `}
+    </div>`;
+}
+
+function renderOppRow(o, activeSt, idx) {
+  const pctFromBase = o.basePrice ? ((o.currentPrice - o.basePrice) / o.basePrice * 100) : 0;
+  const stateLabel = { 'in-zone': 'In Zone', 'near-zone': 'Near Zone', 'active': 'Active', 'averaging': '10% Avg', 'future': 'Future', 'unknown': '—' };
+  const stateClass = { 'in-zone': 'in-zone', 'near-zone': 'near-zone', 'active': 'active', 'averaging': 'averaging', 'future': 'future', 'unknown': 'future' };
+  const dateStr = o.bunchDate ? o.bunchDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'})
+                : o.stackDate ? o.stackDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'}) : '—';
+  const pctColor = pctFromBase <= -10 ? 'var(--red)' : pctFromBase <= 0 ? 'var(--green)' : pctFromBase <= 5 ? 'var(--amber)' : 'var(--text2)';
+
+  const col4 = activeSt === 'dividend'
+    ? `<div><div class="mono muted">₹${fmt(o.sma200)}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${o.dropFromSMA?.toFixed(1)}% below SMA</div></div>`
+    : activeSt === 'sma'
+    ? renderSMAStackMini(o.data)
+    : `<div class="mono ${o.rangePct>=30?'up':''}">${o.rangePct?.toFixed(1)}%</div>`;
+
+  // Mobile card
+  const mobileCard = `
+    <div class="mob-card" onclick="showDetail('${o.id}')">
+      <div class="mob-card-top">
+        <div>
+          <div class="co-name">${o.name}</div>
+          <div class="co-ticker">${o.ticker}</div>
+        </div>
+        <span class="state-badge ${stateClass[o.state]}">${stateLabel[o.state]}</span>
+      </div>
+      <div class="mob-card-body">
+        <div class="mob-card-stat">
+          <div class="mob-card-stat-label">Price</div>
+          <div class="mob-card-stat-val">₹${fmt(o.currentPrice)}</div>
+        </div>
+        <div class="mob-card-stat">
+          <div class="mob-card-stat-label">Base</div>
+          <div class="mob-card-stat-val">₹${fmt(o.basePrice)}</div>
+        </div>
+        <div class="mob-card-stat">
+          <div class="mob-card-stat-label">From Base</div>
+          <div class="mob-card-stat-val" style="color:${pctColor}">${pctFromBase>=0?'+':''}${pctFromBase.toFixed(1)}%</div>
+        </div>
+        <div class="mob-card-stat">
+          <div class="mob-card-stat-label">${activeSt==='dividend'?'Drop':'Range'}</div>
+          <div class="mob-card-stat-val ${activeSt!=='dividend'&&o.rangePct>=30?'up':''}">${activeSt==='dividend'?(o.dropFromSMA?.toFixed(1)+'%'):activeSt==='sma'?'Stack':(o.rangePct?.toFixed(1)+'%')}</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Desktop row
+  const desktopRow = `<div class="table-row grid-v200 desktop-only-row" style="animation-delay:${idx*0.03}s" onclick="showDetail('${o.id}')">
+    <div>
+      <div class="co-name">${o.name}</div>
+      <div class="co-ticker">${o.ticker}</div>
+    </div>
+    <div>
+      <div class="mono">₹${fmt(o.currentPrice)}</div>
+      <div class="price-bar-wrap"><div class="price-bar-fill" style="width:${Math.min(100,Math.max(5,o.basePrice&&o.bunchTop?((o.currentPrice-o.basePrice)/(o.bunchTop-o.basePrice)*100):50))}%;background:${pctColor}"></div></div>
+    </div>
+    <div>
+      <div class="mono">₹${fmt(o.basePrice)}</div>
+      <div style="font-size:10px;margin-top:2px;color:${pctColor}">${pctFromBase>=0?'+':''}${pctFromBase.toFixed(1)}%</div>
+    </div>
+    ${col4}
+    <div class="mono muted" style="font-size:11px">${dateStr}</div>
+    <div><span class="state-badge ${stateClass[o.state]}">${stateLabel[o.state]}</span></div>
+  </div>`;
+
+  return `<div class="opp-row-wrap">${mobileCard}${desktopRow}</div>`;
+}
+
+function renderSMAStackMini(data) {
+  if (!data || !data.sma200) return '<div class="muted">—</div>';
+  const vals = [
+    { label: '200', val: data.sma200, color: 'var(--red)' },
+    { label: '50', val: data.sma50, color: 'var(--amber)' },
+    { label: '21', val: data.sma21, color: 'var(--blue)' },
+    { label: 'CMP', val: data.price, color: 'var(--green)' },
+  ];
+  const max = Math.max(...vals.map(v=>v.val||0));
+  return `<div class="sma-stack">${vals.map(v=>`
+    <div style="display:flex;align-items:center;gap:4px">
+      <div style="width:28px;font-size:9px;color:var(--text3);font-family:var(--font-mono)">${v.label}</div>
+      <div style="width:${Math.round((v.val/max)*60)}px;height:3px;border-radius:2px;background:${v.color}"></div>
+      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text2)">₹${fmt(v.val)}</div>
+    </div>`).join('')}</div>`;
+}
+
+// ─── AVERAGING PAGE ───────────────────────────────────────────────────────────
+function renderAveragingPage() {
+  const el = document.getElementById('page-averaging');
+  const avgOpps = STATE.opportunities.filter(o => o.state === 'averaging');
+
+  const groups = {
+    'V200 — Bunch': avgOpps.filter(o=>o.list==='v200'&&o.strategy==='bunch'),
+    'V40 — Bunch': avgOpps.filter(o=>o.list==='v40'&&o.strategy==='bunch'),
+    'V40 Next — Bunch': avgOpps.filter(o=>o.list==='v40next'&&o.strategy==='bunch'),
+    'V40 — SMA Stack': avgOpps.filter(o=>o.list==='v40'&&o.strategy==='sma'),
+    'V40 Next — SMA Stack': avgOpps.filter(o=>o.list==='v40next'&&o.strategy==='sma'),
+    'Dividend': avgOpps.filter(o=>o.list==='dividend'),
+  };
+
+  el.innerHTML = `
+    <div class="topbar">
+      <div>
+        <div class="page-title">10% Averaging Opportunities</div>
+        <div class="page-subtitle">Price has fallen 10%+ below base — consider averaging</div>
+      </div>
+    </div>
+    <div class="content">
+      ${Object.entries(groups).map(([groupName, items]) => {
+        if (items.length === 0) return '';
+        return `
+          <div class="section">
+            <div class="section-head">
+              <div class="section-title"><span class="dot red"></span>${groupName}</div>
+              <span style="font-size:11px;color:var(--text3)">${items.length} companies</span>
+            </div>
+            <div class="table-wrap">
+              <div class="table-header" style="grid-template-columns:1.8fr 1fr 1fr 1fr 90px">
+                <div>Company</div><div>Current Price</div><div>Base Price</div><div>Drop from Base</div><div>Status</div>
+              </div>
+              ${items.map((o,i) => {
+                const drop = ((o.currentPrice - o.basePrice) / o.basePrice * 100);
+                return `<div class="table-row" style="grid-template-columns:1.8fr 1fr 1fr 1fr 90px;animation-delay:${i*0.03}s" onclick="showDetail('${o.id}')">
+                  <div><div class="co-name">${o.name}</div><div class="co-ticker">${o.ticker}</div></div>
+                  <div class="mono dn">₹${fmt(o.currentPrice)}</div>
+                  <div class="mono muted">₹${fmt(o.basePrice)}</div>
+                  <div class="mono dn">${drop.toFixed(1)}%</div>
+                  <div><span class="state-badge averaging">Avg Zone</span></div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+      }).join('')}
+      ${avgOpps.length === 0 ? `<div class="empty-state"><strong>No averaging opportunities</strong>Companies appear here when price drops 10%+ below their base price</div>` : ''}
+    </div>`;
+}
+
+// ─── DETAIL PANEL ─────────────────────────────────────────────────────────────
+function showDetail(id) {
+  const o = STATE.opportunities.find(x => x.id === id);
+  if (!o) return;
+  const panel = document.getElementById('detail-panel');
+  const d = o.data;
+  const pctFromBase = ((o.currentPrice - o.basePrice) / o.basePrice * 100);
+  const stateLabel = { 'in-zone': 'In Buying Zone', 'near-zone': 'Near Zone', 'active': 'Active — Pulling Back', 'averaging': '10% Averaging', 'future': 'Future', 'unknown': '—' };
+  const stateClass = { 'in-zone': 'in-zone', 'near-zone': 'near-zone', 'active': 'active', 'averaging': 'averaging', 'future': 'future', 'unknown': 'future' };
+
+  panel.innerHTML = `
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+    <div style="margin-top:8px">
+      <span class="strat-tag ${o.strategy==='bunch'?'bunch':o.strategy==='sma'?'sma':'div'}">${o.strategy==='bunch'?'Green Bunch':o.strategy==='sma'?'SMA Stack':'Dividend'}</span>
+      <span style="margin-left:6px;font-size:10px;color:var(--text3)">${o.list.toUpperCase()}</span>
+    </div>
+    <div class="detail-name">${o.name}</div>
+    <div class="detail-ticker">${o.ticker}.NS</div>
+
+    <div style="margin-top:16px">
+      <span class="state-badge ${stateClass[o.state]}">${stateLabel[o.state]}</span>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Price Info</div>
+      <div class="detail-row"><span class="detail-key">Current Price</span><span class="detail-val">₹${fmt(o.currentPrice)}</span></div>
+      <div class="detail-row"><span class="detail-key">Base Price</span><span class="detail-val">₹${fmt(o.basePrice)}</span></div>
+      <div class="detail-row"><span class="detail-key">Distance from Base</span><span class="detail-val" style="color:${pctFromBase<=0?'var(--green)':pctFromBase<=5?'var(--amber)':'var(--text3)'}">${pctFromBase>=0?'+':''}${pctFromBase.toFixed(2)}%</span></div>
+      <div class="detail-row"><span class="detail-key">10% Avg Level</span><span class="detail-val" style="color:var(--red)">₹${fmt(o.basePrice * 0.9)}</span></div>
+      ${o.bunchTop ? `<div class="detail-row"><span class="detail-key">Invalidation Level</span><span class="detail-val">₹${fmt(o.bunchTop)}</span></div>` : ''}
+    </div>
+
+    ${d ? `<div class="detail-section">
+      <div class="detail-section-title">Moving Averages</div>
+      <div class="detail-row"><span class="detail-key">200 SMA</span><span class="detail-val" style="color:var(--red)">₹${fmt(d.sma200)}</span></div>
+      <div class="detail-row"><span class="detail-key">50 SMA</span><span class="detail-val" style="color:var(--amber)">₹${fmt(d.sma50)}</span></div>
+      <div class="detail-row"><span class="detail-key">21 SMA</span><span class="detail-val" style="color:var(--blue)">₹${fmt(d.sma21)}</span></div>
+    </div>` : ''}
+
+    ${o.strategy === 'bunch' ? `<div class="detail-section">
+      <div class="detail-section-title">Green Bunch Details</div>
+      <div class="detail-row"><span class="detail-key">Range</span><span class="detail-val up">${o.rangePct?.toFixed(2)}%</span></div>
+      <div class="detail-row"><span class="detail-key">Bunch start</span><span class="detail-val">${o.bunchDate?.toLocaleDateString('en-IN')}</span></div>
+      <div class="detail-row"><span class="detail-key">Bunch end</span><span class="detail-val">${o.opportunityDate?.toLocaleDateString('en-IN')}</span></div>
+      <div class="detail-row"><span class="detail-key">Bunch low</span><span class="detail-val">₹${fmt(o.basePrice)}</span></div>
+      <div class="detail-row"><span class="detail-key">Bunch high</span><span class="detail-val">₹${fmt(o.bunchTop)}</span></div>
+    </div>` : ''}
+
+    ${o.strategy === 'sma' ? `<div class="detail-section">
+      <div class="detail-section-title">SMA Stack</div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.8">
+        200 SMA (₹${fmt(d?.sma200)}) > 50 SMA (₹${fmt(d?.sma50)}) > 21 SMA (₹${fmt(d?.sma21)}) > Price (₹${fmt(o.currentPrice)})
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text3)">
+        Invalidation: Price > 21 SMA > 50 SMA > 200 SMA (full reversal)
+      </div>
+    </div>` : ''}
+
+    ${o.strategy === 'dividend' ? `<div class="detail-section">
+      <div class="detail-section-title">Dividend Signal</div>
+      <div class="detail-row"><span class="detail-key">200 SMA</span><span class="detail-val">₹${fmt(d?.sma200)}</span></div>
+      <div class="detail-row"><span class="detail-key">Signal trigger</span><span class="detail-val">20% below SMA</span></div>
+      <div class="detail-row"><span class="detail-key">Trigger level</span><span class="detail-val">₹${fmt(o.sma200 * 0.8)}</span></div>
+      <div class="detail-row"><span class="detail-key">Drop from SMA</span><span class="detail-val dn">${o.dropFromSMA?.toFixed(2)}%</span></div>
+    </div>` : ''}
+  `;
+  document.getElementById('detail-overlay').style.display = 'flex';
+}
+
+function closeDetail(e) {
+  if (!e || e.target === document.getElementById('detail-overlay')) {
+    document.getElementById('detail-overlay').style.display = 'none';
+  }
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (n == null || isNaN(n)) return '—';
+  if (n >= 1000) return n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  return n.toFixed(2);
+}
+
+function getDistanceStr(o) {
+  const pct = ((o.currentPrice - o.basePrice) / o.basePrice * 100);
+  if (pct <= 0) return `<span class="up">${Math.abs(pct).toFixed(1)}% below base</span>`;
+  return `<span style="color:var(--amber)">${pct.toFixed(1)}% above base</span>`;
+}
+
+async function refreshList(listName) {
+  const companies = STATE.lists[listName];
+  for (const c of companies) {
+    STATE.data[c.ticker] = { ticker: c.ticker, loading: true };
+  }
+  renderCurrentPage();
+  for (const c of companies) {
+    const d = await fetchYahoo(c.ticker);
+    STATE.data[c.ticker] = d;
+    processOpportunities();
+    STATE.lastRefresh = new Date();
+    renderCurrentPage();
+  }
+}
+
+// ─── MOBILE SHEET MODAL ───────────────────────────────────────────────────────
+function openMobSheet() {
+  // Sync desktop values into mobile modal
+  const sid = document.getElementById('gs-sheet-id')?.value || '';
+  const t1 = document.getElementById('gs-tab-v200')?.value || 'V200';
+  const t2 = document.getElementById('gs-tab-v40')?.value || 'V40';
+  const t3 = document.getElementById('gs-tab-v40next')?.value || 'V40Next';
+  const t4 = document.getElementById('gs-tab-div')?.value || 'Dividend';
+  const m = document.getElementById('mob-gs-sheet-id'); if (m) m.value = sid;
+  const mt1 = document.getElementById('mob-gs-tab-v200'); if (mt1) mt1.value = t1;
+  const mt2 = document.getElementById('mob-gs-tab-v40'); if (mt2) mt2.value = t2;
+  const mt3 = document.getElementById('mob-gs-tab-v40next'); if (mt3) mt3.value = t3;
+  const mt4 = document.getElementById('mob-gs-tab-div'); if (mt4) mt4.value = t4;
+  document.getElementById('mob-sheet-modal').classList.add('open');
+}
+
+function closeMobSheet(e) {
+  if (!e || e.target === document.getElementById('mob-sheet-modal')) {
+    document.getElementById('mob-sheet-modal').classList.remove('open');
+  }
+}
+
+async function loadFromMobSheet() {
+  // Sync mobile values back to desktop inputs then call shared loader
+  const sid = document.getElementById('mob-gs-sheet-id')?.value?.trim() || '';
+  const t1 = document.getElementById('mob-gs-tab-v200')?.value?.trim() || 'V200';
+  const t2 = document.getElementById('mob-gs-tab-v40')?.value?.trim() || 'V40';
+  const t3 = document.getElementById('mob-gs-tab-v40next')?.value?.trim() || 'V40Next';
+  const t4 = document.getElementById('mob-gs-tab-div')?.value?.trim() || 'Dividend';
+  const d1 = document.getElementById('gs-sheet-id'); if (d1) d1.value = sid;
+  const d2 = document.getElementById('gs-tab-v200'); if (d2) d2.value = t1;
+  const d3 = document.getElementById('gs-tab-v40'); if (d3) d3.value = t2;
+  const d4 = document.getElementById('gs-tab-v40next'); if (d4) d4.value = t3;
+  const d5 = document.getElementById('gs-tab-div'); if (d5) d5.value = t4;
+  const statusEl = document.getElementById('mob-gs-status');
+  if (statusEl) { statusEl.textContent = 'Loading...'; statusEl.style.color = 'var(--amber)'; }
+  await loadFromGoogleSheet();
+  const mainStatus = document.getElementById('gs-status');
+  if (statusEl && mainStatus) { statusEl.textContent = mainStatus.textContent; statusEl.style.color = mainStatus.style.color; }
+  if (STATE.opportunities.length > 0 || Object.values(STATE.lists).some(l => l.length > 0)) {
+    setTimeout(() => closeMobSheet(), 1200);
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderDashboard();
+</script>
+</body>
+</html>
